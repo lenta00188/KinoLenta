@@ -289,13 +289,16 @@ git add . && git commit -m "Neon + Render" && git push
 ```
 
 Servis ishga tushgach Render konsolidagi loglarda
-`Bot webhook rejimida ishga tushdi: https://kino-bot.onrender.com` deb chiqishi
-kerak. `/backfill` yoki `python backfill.py` orqali eski kinolarni yuklang.
+`Bot webhook rejimida ishga tushdi: https://kino-bot-zk4t.onrender.com` deb
+chiqishi kerak. URLni bot avtomatik (`RENDER_EXTERNAL_URL`) oladi — domen
+boshqacha bo'lsa ham webhook to'g'ri ishlaydi. `/backfill` yoki
+`python backfill.py` orqali eski kinolarni yuklang.
 
-> ⚠️ **WEBHOOK_URL tekshiruvi:** Service nomi `kino-bot` band bo'lmasa, domen
-> aynan `https://kino-bot.onrender.com` bo'ladi. Agar band bo'lib boshqa domen
-> berilsa, Render Environment'da `WEBHOOK_URL` ni haqiqiy domen bilan
-> yangilang (aksi holda Telegram webhook to'g'ri yo'nalmaydi).
+> ⚠️ **WEBHOOK_URL tekshiruvi:** Render web servisga asl domenni
+> `RENDER_EXTERNAL_URL` env orqali beradi va bot uni avtomatik afzal ko'radi
+> (`https://kino-bot-zk4t.onrender.com` kabi). `render.yaml`dagi `WEBHOOK_URL`
+> shunchaki fallback — lokal/sinab ko'rish uchun. Agar domen o'zgarsa, hech
+> qanday env'ni qo'lda o'zgartirish shart emas.
 >
 > ⚠️ **Free tier eslatmasi:** Render free `web` servisi faoliyatsizlikda
 > uxlab qolishi mumkin. Telegram webhook'i keyingi xabar/kino bilan uni

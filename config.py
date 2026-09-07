@@ -85,7 +85,15 @@ if not (MOVIE_CHANNEL_ID < 0 and str(MOVIE_CHANNEL_ID).startswith("-100")):
 # Render FREE taraqqiyotida faqat "web" service mumkin; worker bloklangan.
 # Shuning uchun bot webhook rejimida ishlaydi. WEBHOOK_URL berilsa — webhook
 # rejimi, berilmasa — lokal polling.
-WEBHOOK_URL = (os.getenv("WEBHOOK_URL", "") or "").strip().rstrip("/")
+#
+# MUHIM: Render web servisga asl (haqiqiy) URL ni RENDER_EXTERNAL_URL avtomatik
+# beradi (masalan https://kino-bot-zk4t.onrender.com). Shu sababli uni birinchi
+# o'rinda ishlatamiz — render.yaml'dagi WEBHOOK_URL faqat fallback (agar
+# RENDER_EXTERNAL_URL bo'lmasa).
+_WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL", "") or "").strip().rstrip("/")
+if not _WEBHOOK_URL:
+    _WEBHOOK_URL = (os.getenv("WEBHOOK_URL", "") or "").strip().rstrip("/")
+WEBHOOK_URL = _WEBHOOK_URL
 WEBHOOK_PATH = (os.getenv("WEBHOOK_PATH", "") or "/webhook").strip() or "/webhook"
 WEBHOOK_SECRET = (os.getenv("WEBHOOK_SECRET", "") or "").strip()
 WEBHOOK_PORT = int(os.getenv("PORT", "8080"))

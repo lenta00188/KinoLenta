@@ -51,8 +51,13 @@ services:
         value: Asia/Tashkent
       - key: DATABASE_URL
         sync: false
+      # MUHIM: Haqiqiy URL Render tomonidan RENDER_EXTERNAL_URL orqali avtomatik
+      # beriladi (masalan https://kino-bot-zk4t.onrender.com) va code uni afzal
+      # ko'radi. Quyidagi WEBHOOK_URL faqat fallback/no-render (lokal) uchun.
+      # Agar domen boshqa bo'lsa, Render env'ida RENDER_EXTERNAL_URL ni
+      # o'chirmang — u avtomatik ishlaydi.
       - key: WEBHOOK_URL
-        value: https://kino-bot.onrender.com
+        value: https://kino-bot-zk4t.onrender.com
       - key: WEBHOOK_PATH
         value: /webhook
       # Python versiyasi: `pythonVersion` field'i Render Blueprint'da mavjud emas —
