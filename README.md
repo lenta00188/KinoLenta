@@ -260,7 +260,13 @@ Har qanday bosqichda `/cancel` yoki **❌ Bekor qilish**.
 ## ☁️ Render.com da deploy (Blueprint — FREE reja)
 
 `render.yaml` fayli Render'ga loyihani bir tugma bilan deploy qilishga tayyor.
-Service turi `worker` — bot HTTP server talab qilmaydi.
+
+> **MUHIM:** Render FREE rejasida `worker` service turi ruxsat etilmagan
+> (`service type is not available for this plan`). Shu sababli bot **`web`
+> service + Telegram webhook** rejimida ishlaydi. Telegram'dagi har bir kino
+> posti/xabar bizning `https://kino-bot.onrender.com/webhook` URL'iga POST
+> yuboradi — bu "inbound traffic" bo'lgani uchun free service uxlasa ham
+> avtomatik uyg'onadi va ishni davom ettiradi.
 
 **Neon bazani tayyorlash (tekin loyiha yetarli):**
 1. https://console.neon.tech → "New Project" → region yaqinroq bo'lganini tanlang.
@@ -278,19 +284,24 @@ git add . && git commit -m "Neon + Render" && git push
 #    render.yaml avtomatik topiladi va servis yaratiladi.
 
 # 3) Deploy paytida quyidagilar so'raladi (sync: false):
-#    BOT_TOKEN, ADMIN_IDS, MOVIE_CHANNEL_ID, DATABASE_URL(yuqoridagi satr)
+#    BOT_TOKEN, MOVIE_CHANNEL_ID, DATABASE_URL (yuqoridagi Neon satri)
+#    ADMIN_IDS va WEBHOOK_URL render.yaml'da oldindan o'rnatilgan.
 ```
 
-Servis ishga tushgach Render konsolidagi loglarda `Bot ishga tushdi!` deb
-chiqishi kerak. `/backfill` yoki `python backfill.py` orqali eski kinolarni
-yuklang.
+Servis ishga tushgach Render konsolidagi loglarda
+`Bot webhook rejimida ishga tushdi: https://kino-bot.onrender.com` deb chiqishi
+kerak. `/backfill` yoki `python backfill.py` orqali eski kinolarni yuklang.
 
-> ⚠️ **Free tier eslatmasi:** Render free `worker` servisi faoliyatsizlikda
-> uxlab qolishi mumkin. Bot polling (so'rov) rejimida ishlagani uchun Telegram
-> xabarlari kelayotganda uxlamaydi; qayta ishga tushganda esa avtomatik ulanadi.
-> Barcha ma'lumot Neon'da saqlanadi, shuning uchun restart hech narsani
-> yo'qotmaydi. Agar doimiy ishlash kerak bo'lsa, `starter` planiga o'tish
-> yetarli (`render.yaml` dagi `plan: starter`).
+> ⚠️ **WEBHOOK_URL tekshiruvi:** Service nomi `kino-bot` band bo'lmasa, domen
+> aynan `https://kino-bot.onrender.com` bo'ladi. Agar band bo'lib boshqa domen
+> berilsa, Render Environment'da `WEBHOOK_URL` ni haqiqiy domen bilan
+> yangilang (aksi holda Telegram webhook to'g'ri yo'nalmaydi).
+>
+> ⚠️ **Free tier eslatmasi:** Render free `web` servisi faoliyatsizlikda
+> uxlab qolishi mumkin. Telegram webhook'i keyingi xabar/kino bilan uni
+> avtomatik "uyg'otadi" (cold start ~5-10 soniya) va barcha holat Neon'da
+> saqlanganligi uchun hech narsa yo'qotilmaydi. Agar doimiy ishlash talab
+> qilinsa, `render.yaml` dagi `plan: starter` ga o'tish yetarli.
 
 `render.yaml` dagi `plan` qiymatini `free` / `starter` qilib o'zgartirishingiz
 mumkin. `.env` serverga yuklanmaydi (`.dockerignore`), qolgan barcha maxfiy

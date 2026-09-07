@@ -1,14 +1,23 @@
 import asyncio
 import logging
 
+from aiohttp import web
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeChat, ErrorEvent
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
-from config import BOT_TOKEN, MOVIE_CHANNEL_ID
+from config import (
+    BOT_TOKEN,
+    MOVIE_CHANNEL_ID,
+    WEBHOOK_PATH,
+    WEBHOOK_PORT,
+    WEBHOOK_SECRET,
+    WEBHOOK_URL,
+)
 from database import init_db
 from handlers import (
     admin,
@@ -93,6 +102,41 @@ def build_dispatcher() -> Dispatcher:
     return dp
 
 
+async def run_webhook(bot: Bot, dp: Dispatcher, scheduler_task: asyncio.Task) -> None:
+    """Telegram webhook + minimal /health (Render free web service uchun)."""
+    webhook_path = WEBHOOK_PATH or "/webhook"
+    await bot.set_webhook(
+        f"{WEBHOOK_URL}{webhook_path}",
+        allowed_updates=dp.resolve_used_update_types(),
+        secret_token=WEBHOOK_SECRET or None,
+    )
+
+    app = web.Application()
+
+    async def health(_: web.Request) -> web.Response:
+        return web.Response(text="ok")
+
+    app.router.add_get("/health", health)
+    SimpleRequestHandler(dp, bot, secret_token=WEBHOOK_SECRET or None).register(
+        app, path=webhook_path
+    )
+    setup_application(app, dp, bot=bot)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, host="0.0.0.0", port=WEBHOOK_PORT)
+    await site.start()
+    logger.info("Bot webhook rejimida ishga tushdi: %s", WEBHOOK_URL)
+
+    try:
+        while True:
+            await asyncio.sleep(3600)
+    finally:
+        scheduler_task.cancel()
+        await runner.cleanup()
+        await bot.session.close()
+
+
 async def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -117,6 +161,10 @@ async def main() -> None:
     await set_bot_commands(bot)
 
     scheduler_task = asyncio.create_task(run_reminder_scheduler(bot))
+
+    if WEBHOOK_URL:
+        await run_webhook(bot, dp, scheduler_task)
+        return
 
     logger.info("Bot ishga tushdi! Adminlar: %s", all_admin_ids())
     try:

@@ -78,3 +78,14 @@ if not (MOVIE_CHANNEL_ID < 0 and str(MOVIE_CHANNEL_ID).startswith("-100")):
         "Kanal/superguruh ID lari odatda '-100...' bilan boshlanadi. "
         "@RawDataBot orqali to'g'ri ID ni oling."
     )
+
+# ---------------------------------------------------------------------------
+# WEBHOOK (Render.com free web service) — ixtiyoriy
+# ---------------------------------------------------------------------------
+# Render FREE taraqqiyotida faqat "web" service mumkin; worker bloklangan.
+# Shuning uchun bot webhook rejimida ishlaydi. WEBHOOK_URL berilsa — webhook
+# rejimi, berilmasa — lokal polling.
+WEBHOOK_URL = (os.getenv("WEBHOOK_URL", "") or "").strip().rstrip("/")
+WEBHOOK_PATH = (os.getenv("WEBHOOK_PATH", "") or "/webhook").strip() or "/webhook"
+WEBHOOK_SECRET = (os.getenv("WEBHOOK_SECRET", "") or "").strip()
+WEBHOOK_PORT = int(os.getenv("PORT", "8080"))

@@ -1,23 +1,28 @@
 # render.yaml — Render.com Blueprint (Blueprint)
 # ---------------------------------------------------------------------------
 # Bu fayl Render'ga loyihani bir tugma bilan deploy qilish imkonini beradi.
-# Service turi "worker": bot HTTP server talab qilmaydi, doimiy jarayon.
 #
-# Render FREE tier uchun sozlangan:
-#   - plan: free — 512 MB RAM / 0.1 CPU, to'lov karta talab qilinmasligi mumkin
-#   - Free tier'dagi worker jarayonlar faoliyatsizlikda uxlatilishi mumkin;
-#     bot polling rejimida ishlaganligi uchun qayta ishga tushganda avtomatik
-#     Telegram'ga ulanadi (xotira konteksti yo'q — hammasi Neon'da).
+# MUHIM: Renderning FREE rejasida "worker" service TUR bo'lib, faqat "web"
+# (va static site) service turlari tekin. Shuning uchun bot WEBHOOK rejimida
+# ishlaydigan WEB service sifatida deploy qilinadi:
+#   - Telegram: yangi kino/post = Message -> bot webhook URL'ga POST yuboradi
+#   - Render: webhook request "inbound traffic" bo'lgani uchun free instance
+#     uyquga ketsa ham, Telegram'dagi har qanday kino/xabar avtomatik
+#     "uyg'otadi" (cold start ~5-10 soniya).
+#   - Barcha holat Neon'da, xotira (MemoryStorage) faqat joriy jarayon uchun.
 #
 # Qanday ishlatiladi:
 #   1) Reponi GitHub/GitLab ga push qiling.
 #   2) https://dashboard.render.com -> "New +" -> "Blueprint"
 #      -> reponi tanlang (render.yaml avtomatik topiladi).
-#   3) Deploy paytida `sync: false` bo'lgan o'zgaruvchilar so'raladi:
+#   3) Deploy paytida `sync: false` bo'lgan maxfiy o'zgaruvchilar so'raladi:
 #      - BOT_TOKEN        (@BotFather dan)
 #      - MOVIE_CHANNEL_ID (markaziy kino kanali, -100... bilan boshlanadi)
 #      - DATABASE_URL     (Neon PostgreSQL ulanish satri)
-#      (ADMIN_IDS quyida oldindan o'rnatilgan — deployda so'ralmaydi.)
+#      (ADMIN_IDS va WEBHOOK_URL quyida oldindan o'rnatilgan.)
+#   4) Service nomi (kino-bot) -> onrender.com domeni:
+#      https://kino-bot.onrender.com  (agar band bo'lsa, WEBHOOK_URL ni
+#      Render dashboard'da ko'rsatilgan haqiqiy domen bilan almashtiring).
 #
 # Neon ma'lumotlar bazasi (free tier ham etarli):
 #   - https://console.neon.tech da loyiha yarating (birinchi 0.5 GB tekin)
@@ -28,12 +33,14 @@
 # ---------------------------------------------------------------------------
 
 services:
-  - type: worker
+  - type: web
     name: kino-bot
     runtime: python
     plan: free
+    pythonVersion: 3.12.3
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
+    healthCheckPath: /health
     envVars:
       - key: BOT_TOKEN
         sync: false
@@ -45,3 +52,7 @@ services:
         value: Asia/Tashkent
       - key: DATABASE_URL
         sync: false
+      - key: WEBHOOK_URL
+        value: https://kino-bot.onrender.com
+      - key: WEBHOOK_PATH
+        value: /webhook
