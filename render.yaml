@@ -37,7 +37,6 @@ services:
     name: kino-bot
     runtime: python
     plan: free
-    pythonVersion: 3.12.3
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
     healthCheckPath: /health
@@ -56,3 +55,7 @@ services:
         value: https://kino-bot.onrender.com
       - key: WEBHOOK_PATH
         value: /webhook
+      # Python versiyasi: `pythonVersion` field'i Render Blueprint'da mavjud emas —
+      # buning o'rniga PYTHON_VERSION (to'liq versiya) env o'zgaruvchisi ishlaydi.
+      - key: PYTHON_VERSION
+        value: 3.12.3
