@@ -1,0 +1,47 @@
+# render.yaml — Render.com Blueprint (Blueprint)
+# ---------------------------------------------------------------------------
+# Bu fayl Render'ga loyihani bir tugma bilan deploy qilish imkonini beradi.
+# Service turi "worker": bot HTTP server talab qilmaydi, doimiy jarayon.
+#
+# Render FREE tier uchun sozlangan:
+#   - plan: free — 512 MB RAM / 0.1 CPU, to'lov karta talab qilinmasligi mumkin
+#   - Free tier'dagi worker jarayonlar faoliyatsizlikda uxlatilishi mumkin;
+#     bot polling rejimida ishlaganligi uchun qayta ishga tushganda avtomatik
+#     Telegram'ga ulanadi (xotira konteksti yo'q — hammasi Neon'da).
+#
+# Qanday ishlatiladi:
+#   1) Reponi GitHub/GitLab ga push qiling.
+#   2) https://dashboard.render.com -> "New +" -> "Blueprint"
+#      -> reponi tanlang (render.yaml avtomatik topiladi).
+#   3) Deploy paytida `sync: false` bo'lgan o'zgaruvchilar so'raladi:
+#      - BOT_TOKEN        (@BotFather dan)
+#      - MOVIE_CHANNEL_ID (markaziy kino kanali, -100... bilan boshlanadi)
+#      - DATABASE_URL     (Neon PostgreSQL ulanish satri)
+#      (ADMIN_IDS quyida oldindan o'rnatilgan — deployda so'ralmaydi.)
+#
+# Neon ma'lumotlar bazasi (free tier ham etarli):
+#   - https://console.neon.tech da loyiha yarating (birinchi 0.5 GB tekin)
+#   - Neon dashboard → "Connect" → "Pooled connection string" (PostgreSQL)
+#     ni nusxalab DATABASE_URL ga qo'ying (sslmode=require kiritilgan bo'ladi).
+#   - Yoki Render'ning Neon integrasiyasi: dashboard → "New +" → "Neon PostgreSQL"
+#     (DATABASE_URL avtomatik yoziladi).
+# ---------------------------------------------------------------------------
+
+services:
+  - type: worker
+    name: kino-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_IDS
+        value: 8752045573,6496759979
+      - key: MOVIE_CHANNEL_ID
+        sync: false
+      - key: TZ
+        value: Asia/Tashkent
+      - key: DATABASE_URL
+        sync: false
