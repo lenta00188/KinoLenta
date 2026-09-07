@@ -44,7 +44,7 @@ services:
       - key: BOT_TOKEN
         sync: false
       - key: ADMIN_IDS
-        value: 8752045573,6496759979
+        value: 8249917172,6496759979
       - key: MOVIE_CHANNEL_ID
         sync: false
       - key: TZ
